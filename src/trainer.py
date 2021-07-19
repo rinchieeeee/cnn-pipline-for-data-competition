@@ -7,8 +7,9 @@ from optimizer import get_optimizer
 from train import train, inference
 import yaml
 from logger import *
+import numpy as np
 
-def trainer(folds: pd.DataFrame, fold: int, device, config : dict):
+def trainer(folds: pd.DataFrame, fold: int, device, config : dict, LOGGER):
     
     LOGGER.info(f"=========== fold : {fold} training ============")
     
@@ -19,7 +20,7 @@ def trainer(folds: pd.DataFrame, fold: int, device, config : dict):
     
     train_df = folds.loc[train_idx].reset_index(drop = True)
     val_df = folds.loc[val_idx].reset_index(drop = True)
-    val_labels = val_df[CFG.target_cols].values
+    val_labels = val_df[config["target_cols"]].values
     
     train_dataset = CustomDataset(train_df, augmentation = get_transforms(data = "train"))
     valid_dataset = CustomDataset(val_df, augmentation = get_transforms(data = "valid"))
@@ -69,8 +70,8 @@ def trainer(folds: pd.DataFrame, fold: int, device, config : dict):
     # epoch部分
     
     #criterion = nn.BCEWithLogitsLoss()
-    criterion = FocalLoss()  # (logit, taregt)
-    critetion = get_lossfunc(config_train["loss_function"])
+    #criterion = FocalLoss()  # (logit, taregt)
+    criterion = get_lossfunc(config_train["loss_function"])
     best_score = 0.0
     best_loss = np.inf # for early stopping
     early_stopping_count = 0
@@ -81,15 +82,15 @@ def trainer(folds: pd.DataFrame, fold: int, device, config : dict):
         start_time = time.time()
         
         # train
-        avg_loss = train(train_loader, model, criterion, optimizer, epoch, scheduler, device, config_general)
+        avg_loss = train(train_loader, model, criterion, optimizer, epoch, scheduler, device, config["general"])
         
         # eval
-        avg_val_loss, preds = inference(valid_loader, model, criterion, device, config_general)
+        avg_val_loss, preds = inference(valid_loader, model, criterion, device, config["general"])
         
         scheduler.step()
             
         # スコアを計算
-        score = get_score(val_labels, preds)
+        score, scores = get_score(val_labels, preds)
         
         elapsed = time.time() - start_time
         
@@ -103,7 +104,7 @@ def trainer(folds: pd.DataFrame, fold: int, device, config : dict):
             LOGGER.info(f'Epoch {epoch+1} - Save Best Loss: {best_loss:.4f} Model')
             torch.save({'model': model.state_dict(), 
                         'preds': preds},
-                        OUTPUT_DIR + "/" + f'{CFG.model_name}_fold{fold}_best.pth')
+                        config["general"]["output_dir"] + "/" + f'{config["general"]["name"]}_fold{fold}_best.pth')
             
         else:
             early_stopping_count += 1
@@ -111,10 +112,10 @@ def trainer(folds: pd.DataFrame, fold: int, device, config : dict):
         if early_stopping_count >= config_train["patience"]:
             break
     
-    check_point = torch.load(OUTPUT_DIR + "/" + f'{CFG.model_name}_fold{fold}_best.pth')
-    for c in [f'pred_{c}' for c in CFG.target_cols]:
+    check_point = torch.load(config["general"]["output_dir"] + "/" + f'{config["model"]["name"]}_fold{fold}_best.pth')
+    for c in [f'pred_{c}' for c in config["target_cols"]]:
         val_df[c] = np.nan
-    val_df[[f'pred_{c}' for c in CFG.target_cols]] = check_point['preds']
+    val_df[[f'pred_{c}' for c in config["target_cols"]]] = check_point['preds']
     #val_df["pred_label"] = np.nan
     #val_df.pred_label = check_point["preds"]
 

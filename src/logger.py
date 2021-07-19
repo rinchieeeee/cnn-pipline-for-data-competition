@@ -49,19 +49,18 @@ def timer(name):
     yield
     LOGGER.info(f'[{name}] done in {time.time() - t0:.0f} s.')
 
-def make_output(yaml_file)
-    
-    OUTPUT_DIR = f'../logs/{yaml_file["general"]["output_dir"]}'
-    if not os.path.exists(OUTPUT_DIR):
-    os.makedirs(OUTPUT_DIR)
 
-def init_logger(log_file = OUTPUT_DIR+ "/" +'train.log'):
+def init_logger(config):
+    """
+    config is equal to config_general
+    """
+    log_file = config["output_dir"] + "/" + "train.log"
     from logging import getLogger, INFO, FileHandler,  Formatter,  StreamHandler
     logger = getLogger(__name__)
     logger.setLevel(INFO)
     handler1 = StreamHandler()
     handler1.setFormatter(Formatter("%(message)s"))
-    handler2 = FileHandler(filename=log_file)
+    handler2 = FileHandler(filename = log_file)
     handler2.setFormatter(Formatter("%(message)s"))
     logger.addHandler(handler1)
     logger.addHandler(handler2)

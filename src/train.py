@@ -16,7 +16,6 @@ def train(train_loader, model, criterion, optimizer, epoch, scheduler, device, c
     
     model.train()
     start = end = time.time()
-    global_step = 0
     
     for batch, data in enumerate(train_loader):
         # measure data loading time
@@ -27,7 +26,7 @@ def train(train_loader, model, criterion, optimizer, epoch, scheduler, device, c
         batch_size = labels.size(0)
         
         losses = train_step(images, labels, model, criterion, 
-                            optimizer, scheduler, config, losses)
+                            optimizer, scheduler, config, losses, batch)
 
         #経過時間の計算
         batch_time.update(time.time() - end)
@@ -44,8 +43,9 @@ def train(train_loader, model, criterion, optimizer, epoch, scheduler, device, c
     return losses.avg
 
 
-def train_step(images, labels, model, criterion, optimizer, scheduler, config, losses):
+def train_step(images, labels, model, criterion, optimizer, scheduler, config, losses, batch):
 
+    global_step = 0
     if config["fp16"] == True:
         
         with autocast():

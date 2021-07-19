@@ -26,7 +26,12 @@ class CustomDataset(Dataset):
             augmented = self.augmentation(image = image)
             image = augmented["image"]
 
+
+        """
+        if loss function is BCEWithLogitsLoss, input data into loss function must be torch Float type 
+
+        """
         return {
-            "image" : image, 
-            "label": label_name,
+            "image" : torch.tensor(image, dtype = float), 
+            "label": torch.tensor(label_name, dtype = float), 
         }

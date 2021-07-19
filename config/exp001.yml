@@ -1,12 +1,11 @@
 general:
-  output_dir: exp001
   print_log_freq: 100
   num_works: 8
   seed: 2021
   grad_acc_step: 1
   fp16: True
   train_file: ../input/hogehoge/...
-  output_dir: log_exp001
+  output_dir: ./log_exp001
   train: True
   n_fold: 5
   trn_fold:
@@ -66,7 +65,7 @@ split:
     shuffle: True
 
 train:
-  loss_function: BCEWithLogitLoss
+  loss_function: BCEWithLogitsLoss
   patience: 5
   train_batch_size: 64
   val_batch_size: 128
@@ -92,3 +91,9 @@ model:
   name: ResNet50
   pretrained: True
   class_num: 2
+
+
+
+target_cols:
+  - hoge
+  - hoge1

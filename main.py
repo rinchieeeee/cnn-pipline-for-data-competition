@@ -23,6 +23,7 @@ from trainer import trainer
 from logger import init_logger, get_score
 import yaml
 from attrdict import AttrDict
+from metrics import get_score
             
 
 def seed_torch(seed = 0):
@@ -44,6 +45,8 @@ def get_cv_split(config):
         return StratifiedKFold(**config_split["params"])
 
 
+
+
 def main():
 
     """
@@ -60,11 +63,13 @@ def main():
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     print(f"We use {device}!")
 
-
+    """
+    make output directory
+    """
     if not os.path.exists(config_general["output_dir"]):
         os.makedirs(config_general["output_dir"])
 
-    LOGGER = init_logger()
+    LOGGER = init_logger(config_general)
     seed_torch(seed = config_general["seed"])
 
     folds = train.copy()
@@ -87,7 +92,7 @@ def main():
         oof_df = pd.DataFrame()
         for fold in range(config_general["n_fold"]):
             if fold in config_general["trn_fold"]:
-                _oof_df = trainer(folds, fold, device, config)
+                _oof_df = trainer(folds, fold, device, config, LOGGER)
                 oof_df = pd.concat([oof_df, _oof_df])
                 LOGGER.info(f"======== fold : {fold} result =========")
                 get_result(_oof_df)
