@@ -4,7 +4,7 @@ general:
   seed: 2021
   grad_acc_step: 1
   fp16: True
-  train_file: ../input/hogehoge/...
+  train_file: ./input/hogehoge/...
   output_dir: ./log_exp001
   train: True
   n_fold: 5
@@ -20,10 +20,10 @@ transforms:
   train:
     - name : RandomCrop
       params: 
-        height : 550
-        weight : 500
+        height : 600
+        weight : 600
     - name: HorizontalFlip
-     params:
+      params:
       p : 0.5
     - name: RandamRotate90
       params:
@@ -36,22 +36,20 @@ transforms:
         p : 1.0
         mean: [0.486, 0.456, 0.406]
         std: [0.229, 0.224, 0.225]
-
-    - name: ToTensor
+    - name: ToTensorV2
       params:
         p : 1.0
   
   valid:
     - name: Resize
       params:
-        height : 550
-        weight : 880
+        height : 600
+        weight : 600
     - name : Normalize
       params:
         p : 1.0
         mean: [0.486, 0.456, 0.406]
         std: [0.229, 0.224, 0.225]
-    
     - name : ToTensorV2
       params:
         p : 1.0
@@ -88,7 +86,7 @@ optimizer:
 
 
 model:
-  name: ResNet50
+  name: reset50
   pretrained: True
   class_num: 2
 
