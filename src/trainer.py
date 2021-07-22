@@ -2,9 +2,14 @@ import time
 import pandas as pd
 from torch.utils.data import DataLoader, Dataset
 from models import get_model
+import torch
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts, CosineAnnealingLR, ReduceLROnPlateau
 from optimizer import get_optimizer
 from train import train, inference
+from dataset import CustomDataset
+from transforms import get_transforms
+from loss_func import get_lossfunc
+from metrics import get_score
 import yaml
 from logger import *
 import numpy as np
@@ -22,8 +27,8 @@ def trainer(folds: pd.DataFrame, fold: int, device, config : dict, LOGGER):
     val_df = folds.loc[val_idx].reset_index(drop = True)
     val_labels = val_df[config["target_cols"]].values
     
-    train_dataset = CustomDataset(train_df, augmentation = get_transforms(data = "train"))
-    valid_dataset = CustomDataset(val_df, augmentation = get_transforms(data = "valid"))
+    train_dataset = CustomDataset(train_df, config, augmentation = get_transforms(config = config, data_type = "train"))
+    valid_dataset = CustomDataset(val_df, config, augmentation = get_transforms(config = config, data_type = "valid"))
     
     # drop_last = Trueは, dataset sizeがbatchで割り切れなかった時に, 最後に残るbatchを捨てて, 学習しないことを意味する.
     # こうする事により, norm batch系などでエラーが出なくなるよ.
@@ -76,7 +81,7 @@ def trainer(folds: pd.DataFrame, fold: int, device, config : dict, LOGGER):
     best_loss = np.inf # for early stopping
     early_stopping_count = 0
 
-    LOGGER = init_logger()
+    LOGGER = init_logger(config["general"])
     
     for epoch in range(config_train["epochs"]):
         start_time = time.time()
@@ -104,7 +109,7 @@ def trainer(folds: pd.DataFrame, fold: int, device, config : dict, LOGGER):
             LOGGER.info(f'Epoch {epoch+1} - Save Best Loss: {best_loss:.4f} Model')
             torch.save({'model': model.state_dict(), 
                         'preds': preds},
-                        config["general"]["output_dir"] + "/" + f'{config["general"]["name"]}_fold{fold}_best.pth')
+                        config["general"]["output_dir"] + "/" + f'{config["model"]["name"]}_fold{fold}_best.pth')
             
         else:
             early_stopping_count += 1

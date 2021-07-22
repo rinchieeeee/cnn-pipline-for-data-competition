@@ -18,7 +18,7 @@ def get_transforms(config: dict, data_type : str):
     if data_type == 'train':
         for aug in transforms["train"]:
             transforms_name = aug["name"]
-            transforms_params = {} if transforms_name["params"] is None else transforms_name["params"]
+            transforms_params = {} if aug["params"] is None else aug["params"]
             if globals().get(transforms_name) is not None:
                 transforms_func = globals()[transforms_name]  # globals()で, global変数が取得している
                 transform_list.append(transforms_func(**transforms_params))

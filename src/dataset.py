@@ -1,15 +1,16 @@
 import torch
 from torch.utils.data import Dataset
 import cv2
+import pandas as pd
 
 class CustomDataset(Dataset):
 
-    def __init__(self, df: pd.DataFrame, augmentation = None):
+    def __init__(self, df: pd.DataFrame, config : dict, augmentation = None):
         self.df = df
-        self.file_name = df.file_name.values
+        config = config["target_cols"]
+        self.file_name = df[config["target_cols"]].values
         self.labels = df.labels.values
         self.augmentation = augmentation
-
 
     def __len__(self):
         return len(self.df)

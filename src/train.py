@@ -8,7 +8,7 @@ def train(train_loader, model, criterion, optimizer, epoch, scheduler, device, c
     """
     config : config is config_general in trainer.py
     """
-    scaler = GradScaler()  # PyTorch のampライブラリを用いて, 高速化する. 32flopsを16に落として高速化.
+    #scaler = GradScaler()  # PyTorch のampライブラリを用いて, 高速化する. 32flopsを16に落として高速化.
     batch_time = AverageMeter()
     data_time = AverageMeter()
     losses = AverageMeter()
@@ -46,6 +46,8 @@ def train(train_loader, model, criterion, optimizer, epoch, scheduler, device, c
 def train_step(images, labels, model, criterion, optimizer, scheduler, config, losses, batch):
 
     global_step = 0
+    batch_size = labels.size(0)
+    scaler = GradScaler()  # PyTorch のampライブラリを用いて, 高速化する. 32flopsを16に落として高速化.
     if config["fp16"] == True:
         
         with autocast():

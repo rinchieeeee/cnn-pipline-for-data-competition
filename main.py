@@ -19,8 +19,11 @@ from tqdm.auto import tqdm
 
 import torch 
 
+import sys
+sys.path.append(f"{os.getcwd()}/src")
+
 from trainer import trainer
-from logger import init_logger, get_score
+from logger import init_logger
 import yaml
 from attrdict import AttrDict
 from metrics import get_score
@@ -82,7 +85,7 @@ def main():
 
     
     def get_result(result_df):
-        preds = result_df[[f'pred_{c}' for c in CFG.target_cols]].values
+        preds = result_df[[f'pred_{c}' for c in config["target_cols"]]].values
         labels = result_df[CFG.target_cols].values
         score, scores = get_score(labels, preds)
         LOGGER.info(f'Score : {score: <.4f} Scores : {np.round(scores, decimals = 4)}')
