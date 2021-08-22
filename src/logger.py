@@ -52,7 +52,7 @@ def timer(name):
 
 def init_logger(config):
     """
-    config is equal to config_general
+    config is equal to config_general or config["general"]
     """
     log_file = config["output_dir"] + "/" + "train.log"
     from logging import getLogger, INFO, FileHandler,  Formatter,  StreamHandler
